@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/outfitDisplayFragment"
+        android:icon="@drawable/ic_outfit"
+        android:title="穿搭展示" />
+
+    <item
+        android:id="@+id/weatherFragment"
+        android:icon="@drawable/ic_weather"
+        android:title="天气" />
+
+    <item
+        android:id="@+id/aiTryOnFragment"
+        android:icon="@drawable/ic_try_on"
+        android:title="智能换装" />
+
+    <item
+        android:id="@+id/settingsFragment"
+        android:icon="@drawable/ic_settings"
+        android:title="我的" />
+</menu>

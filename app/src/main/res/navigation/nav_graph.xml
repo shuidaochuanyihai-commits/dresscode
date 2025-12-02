@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/outfitDisplayFragment">
+
+    <fragment
+        android:id="@+id/outfitDisplayFragment"
+        android:name="com.example.dresscode.OutfitDisplayFragment"
+        android:label="穿搭展示"
+        tools:layout="@layout/fragment_outfit_display" />
+
+    <fragment
+        android:id="@+id/weatherFragment"
+        android:name="com.example.dresscode.WeatherFragment"
+        android:label="天气"
+        tools:layout="@layout/fragment_weather" />
+
+    <fragment
+        android:id="@+id/aiTryOnFragment"
+        android:name="com.example.dresscode.AiTryOnFragment"
+        android:label="智能换装"
+        tools:layout="@layout/fragment_ai_try_on" />
+
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.example.dresscode.SettingsFragment"
+        android:label="我的"
+        tools:layout="@layout/fragment_settings" />
+
+</navigation>
