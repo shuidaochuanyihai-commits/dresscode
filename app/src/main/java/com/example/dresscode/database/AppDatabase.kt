@@ -6,10 +6,13 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 
 // 这里的 entities 数组里要写上所有的表，以后如果有 Outfit 表也要加进来
-@Database(entities = [User::class], version = 1, exportSchema = false)
+@Database(entities = [User::class, Outfit::class], version = 1, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun userDao(): UserDao
+
+    // 🔴 修改点 2: 增加一个获取 OutfitDao 的抽象方法
+    abstract fun outfitDao(): OutfitDao
 
     companion object {
         @Volatile
