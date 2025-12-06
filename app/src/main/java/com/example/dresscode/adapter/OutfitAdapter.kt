@@ -13,6 +13,15 @@ import com.example.dresscode.database.Outfit
 class OutfitAdapter(private val outfitList: MutableList<Outfit>, private val listener: OnItemClickListener) :
     RecyclerView.Adapter<OutfitAdapter.OutfitViewHolder>() {
 
+    // 当前展示模式 (默认为标题)
+    private var currentMode: String = "title"
+
+    // 外部调用此方法修改模式
+    fun setDisplayMode(mode: String) {
+        this.currentMode = mode
+        notifyDataSetChanged() // 刷新列表
+    }
+
     interface OnItemClickListener {
         fun onFavoriteClick(outfit: Outfit, position: Int)
         fun onOutfitSelect(outfit: Outfit) {}
@@ -33,7 +42,13 @@ class OutfitAdapter(private val outfitList: MutableList<Outfit>, private val lis
     override fun onBindViewHolder(holder: OutfitViewHolder, position: Int) {
         val outfit = outfitList[position]
 
-        holder.titleView.text = outfit.title
+        // 🔴 核心逻辑：根据 currentMode 决定显示什么字
+        holder.titleView.text = when (currentMode) {
+            "style" -> "风格：${outfit.style}"
+            "season" -> "季节：${outfit.season}"
+            "scene" -> "场景：${outfit.scene}"
+            else -> outfit.title // 默认显示标题
+        }
 
         // 设置爱心状态
         val heartIconRes = if (outfit.isFavorite) R.drawable.ic_favorite_filled else R.drawable.ic_favorite_border
@@ -45,22 +60,10 @@ class OutfitAdapter(private val outfitList: MutableList<Outfit>, private val lis
             .placeholder(R.drawable.ic_launcher_foreground)
             .into(holder.imageView)
 
-        // --- 🔴 关键修复区 ---
-
-        // 1. 整个卡片的点击事件
-        holder.itemView.setOnClickListener {
-            listener.onOutfitSelect(outfit)
-        }
-
-        // 2. 为了保险，给图片也单独加一个点击事件 (双保险)
-        holder.imageView.setOnClickListener {
-            listener.onOutfitSelect(outfit)
-        }
-
-        // 3. 爱心的点击事件 (独立处理)
-        holder.favBtn.setOnClickListener {
-            listener.onFavoriteClick(outfit, position)
-        }
+        // 点击事件 (双保险)
+        holder.itemView.setOnClickListener { listener.onOutfitSelect(outfit) }
+        holder.imageView.setOnClickListener { listener.onOutfitSelect(outfit) }
+        holder.favBtn.setOnClickListener { listener.onFavoriteClick(outfit, position) }
     }
 
     override fun getItemCount() = outfitList.size

@@ -11,4 +11,11 @@ interface AiService {
         @Header("Authorization") auth: String, // 填 "Bearer sk-xxx"
         @Body request: ImageGenerationRequest
     ): ImageGenerationResponse
+
+    // 🔴 新增：通义千问对话接口 (兼容模式)
+    @POST("https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions")
+    suspend fun analyzeImage(
+        @Header("Authorization") auth: String, // Bearer sk-xxx
+        @Body request: QwenRequest
+    ): QwenResponse
 }

@@ -35,4 +35,23 @@ interface OutfitDao {
     // gender 逻辑：如果当前选了性别，还得在性别范围内搜；如果没选，就全局搜
     @Query("SELECT * FROM outfit_table WHERE title LIKE '%' || :keyword || '%' AND (gender = :gender OR :gender = 'all')")
     suspend fun searchOutfits(keyword: String, gender: String): List<Outfit>
+
+    // 🔴 新增：高级筛选
+    // 逻辑：如果参数传了空字符串 ""，就代表不筛选这个条件 (使用 LIKE '%%')
+    @Query("""
+        SELECT * FROM outfit_table 
+        WHERE (gender = :gender OR :gender = 'all')
+        AND title LIKE '%' || :keyword || '%'
+        AND (:style = '' OR style = :style)
+        AND (:season = '' OR season = :season)
+        AND (:scene = '' OR scene = :scene)
+    """)
+    suspend fun filterOutfits(
+        keyword: String,
+        gender: String,
+        style: String,
+        season: String,
+        scene: String
+    ): List<Outfit>
 }
+

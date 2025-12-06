@@ -1,84 +1,117 @@
 package com.example.dresscode
 
+import android.content.Context
 import android.os.Bundle
 import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.Spinner
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.dresscode.adapter.OutfitAdapter
 import com.example.dresscode.database.Outfit
-import androidx.lifecycle.Observer
-import androidx.room.Update
 
-class OutfitDisplayFragment : Fragment(R.layout.fragment_outfit_display), OutfitAdapter.OnItemClickListener { // 🔴 继承 Adapter 的监听接口
+class OutfitDisplayFragment : Fragment(R.layout.fragment_outfit_display), OutfitAdapter.OnItemClickListener {
 
     private lateinit var viewModel: OutfitViewModel
     private lateinit var adapter: OutfitAdapter
-
-    // 我们需要一个可变的列表，因为 adapter 里的数据列表是可变的
     private val outfitList = mutableListOf<Outfit>()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 1. 初始化 ViewModel
         viewModel = ViewModelProvider(this)[OutfitViewModel::class.java]
 
         val recyclerView = view.findViewById<RecyclerView>(R.id.recycler_view)
+        val searchView = view.findViewById<androidx.appcompat.widget.SearchView>(R.id.search_view)
 
-        // 2. 设置布局和适配器
+        // 筛选用的 Spinner
+        val spStyle = view.findViewById<Spinner>(R.id.sp_style)
+        val spSeason = view.findViewById<Spinner>(R.id.sp_season)
+        val spScene = view.findViewById<Spinner>(R.id.sp_scene)
+
+        // 初始化列表
         val layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
         layoutManager.gapStrategy = StaggeredGridLayoutManager.GAP_HANDLING_NONE
         recyclerView.layoutManager = layoutManager
 
-        // 传入可变的列表和自己作为监听器
         adapter = OutfitAdapter(outfitList, this)
         recyclerView.adapter = adapter
 
-        // 3. 观察数据变化 (LiveData)
+        // 观察数据
         viewModel.outfitList.observe(viewLifecycleOwner, Observer { newList ->
-            // 当 ViewModel 从数据库拿到新数据时，更新列表
             outfitList.clear()
             outfitList.addAll(newList)
             adapter.notifyDataSetChanged()
-
-            // 🔴 搜索逻辑
-            val searchView = view.findViewById<androidx.appcompat.widget.SearchView>(R.id.search_view)
-
-            searchView.setOnQueryTextListener(object : androidx.appcompat.widget.SearchView.OnQueryTextListener {
-                // 当点击键盘上的搜索键时触发
-                override fun onQueryTextSubmit(query: String?): Boolean {
-                    viewModel.searchOutfits(query ?: "")
-                    return true
-                }
-
-                // 当输入框内容改变时触发 (实时搜索)
-                override fun onQueryTextChange(newText: String?): Boolean {
-                    viewModel.searchOutfits(newText ?: "")
-                    return true
-                }
-            })
         })
 
-        // 4. 首次加载数据
-        viewModel.loadOutfits()
+        // 搜索框监听
+        searchView.setOnQueryTextListener(object : androidx.appcompat.widget.SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                viewModel.applyFilters(query ?: "")
+                return true
+            }
+            override fun onQueryTextChange(newText: String?): Boolean {
+                viewModel.applyFilters(newText ?: "")
+                return true
+            }
+        })
+
+        // 初始化手动筛选下拉菜单
+        setupSpinners(spStyle, spSeason, spScene)
     }
 
+    // 🔴 关键：每次页面可见时，读取设置
     override fun onResume() {
         super.onResume()
-        viewModel.loadOutfits()
+
+        // 1. 刷新数据
+        viewModel.applyFilters()
+
+        // 2. 读取“展示模式” (显示标题还是标签)
+        val prefs = requireContext().getSharedPreferences("app_settings", Context.MODE_PRIVATE)
+        val displayMode = prefs.getString("display_mode", "title") ?: "title"
+
+        // 3. 告诉适配器改变显示内容
+        adapter.setDisplayMode(displayMode)
     }
 
-    // 5. 实现 Adapter 接口的方法：处理收藏按钮点击
-    override fun onFavoriteClick(outfit: Outfit, position: Int) {
-        // 切换数据库中的收藏状态
-        viewModel.toggleFavorite(outfit)
+    private fun setupSpinners(spStyle: Spinner, spSeason: Spinner, spScene: Spinner) {
+        val styles = listOf("所有风格", "休闲", "商务", "街头", "甜美", "复古")
+        val seasons = listOf("所有季节", "夏季", "冬季", "春秋")
+        val scenes = listOf("所有场景", "日常", "上班", "约会", "运动", "派对")
 
-        // 🔴 关键步骤：本地修改数据状态并立即刷新 UI
-        // 注意：toggleFavorite 里会重新 loadOutfits，最终会触发 LiveData 刷新整个列表
-        // 但为了更快响应，我们也可以只刷新单个 item:
-        val newOutfitState = outfit.copy(isFavorite = !outfit.isFavorite, id = outfit.id)
+        bindSpinner(spStyle, styles) { selected ->
+            viewModel.filterStyle.value = if (selected == "所有风格") "" else selected
+            viewModel.applyFilters()
+        }
+        bindSpinner(spSeason, seasons) { selected ->
+            viewModel.filterSeason.value = if (selected == "所有季节") "" else selected
+            viewModel.applyFilters()
+        }
+        bindSpinner(spScene, scenes) { selected ->
+            viewModel.filterScene.value = if (selected == "所有场景") "" else selected
+            viewModel.applyFilters()
+        }
+    }
+
+    private fun bindSpinner(spinner: Spinner, data: List<String>, onSelect: (String) -> Unit) {
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, data)
+        spinner.adapter = adapter
+        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                onSelect(data[position])
+            }
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+    }
+
+    override fun onFavoriteClick(outfit: Outfit, position: Int) {
+        viewModel.toggleFavorite(outfit)
+        val newOutfitState = outfit.copy(isFavorite = !outfit.isFavorite)
         adapter.updateItem(newOutfitState, position)
     }
 }

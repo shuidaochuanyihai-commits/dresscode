@@ -69,8 +69,9 @@ class FavoriteSelectionDialog : BottomSheetDialogFragment() {
                         dismiss() // 关闭弹窗
                     }
                     else {
-                        // 这是一个“查看模式” (在我的收藏里打开时)
-                        Toast.makeText(requireContext(), "这是你收藏的: ${outfit.title}", Toast.LENGTH_SHORT).show()
+                        // 🔴 修改：显示出 AI 打的标签
+                        val msg = "风格:${outfit.style} | 季节:${outfit.season} | 场景:${outfit.scene}"
+                        Toast.makeText(requireContext(), msg, Toast.LENGTH_LONG).show()
                     }
                 }
             })

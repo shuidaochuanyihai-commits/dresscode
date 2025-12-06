@@ -17,4 +17,16 @@ interface UserDao {
     // 查重：看看用户名是不是已经被注册了
     @Query("SELECT * FROM user_table WHERE username = :name LIMIT 1")
     suspend fun getUserByName(name: String): User?
+
+    // 🔴 新增：获取所有用户 (给管理员看)
+    @Query("SELECT * FROM user_table")
+    suspend fun getAllUsers(): List<User>
+
+    // 🔴 新增：统计用户总数
+    @Query("SELECT COUNT(id) FROM user_table")
+    suspend fun getUserCount(): Int
+
+    // 🔴 新增：删除某个用户
+    @androidx.room.Delete
+    suspend fun deleteUser(user: User)
 }
