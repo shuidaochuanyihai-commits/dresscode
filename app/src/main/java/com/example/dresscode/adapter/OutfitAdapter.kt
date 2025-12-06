@@ -13,9 +13,9 @@ import com.example.dresscode.database.Outfit
 class OutfitAdapter(private val outfitList: MutableList<Outfit>, private val listener: OnItemClickListener) :
     RecyclerView.Adapter<OutfitAdapter.OutfitViewHolder>() {
 
-    // 1. 定义接口：用于把点击事件传给 Fragment
     interface OnItemClickListener {
         fun onFavoriteClick(outfit: Outfit, position: Int)
+        fun onOutfitSelect(outfit: Outfit) {}
     }
 
     class OutfitViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -35,30 +35,40 @@ class OutfitAdapter(private val outfitList: MutableList<Outfit>, private val lis
 
         holder.titleView.text = outfit.title
 
-        // 2. 根据收藏状态显示不同的爱心图标
+        // 设置爱心状态
         val heartIconRes = if (outfit.isFavorite) R.drawable.ic_favorite_filled else R.drawable.ic_favorite_border
         holder.favBtn.setImageResource(heartIconRes)
 
-        // 使用 Glide 加载本地资源
+        // 加载图片
         Glide.with(holder.itemView.context)
             .load(outfit.imageResId)
             .placeholder(R.drawable.ic_launcher_foreground)
             .into(holder.imageView)
 
-        // 3. 设置收藏按钮的点击事件
+        // --- 🔴 关键修复区 ---
+
+        // 1. 整个卡片的点击事件
+        holder.itemView.setOnClickListener {
+            listener.onOutfitSelect(outfit)
+        }
+
+        // 2. 为了保险，给图片也单独加一个点击事件 (双保险)
+        holder.imageView.setOnClickListener {
+            listener.onOutfitSelect(outfit)
+        }
+
+        // 3. 爱心的点击事件 (独立处理)
         holder.favBtn.setOnClickListener {
-            // 将点击事件传给 Fragment 处理，同时传入当前的数据和位置
             listener.onFavoriteClick(outfit, position)
         }
     }
 
     override fun getItemCount() = outfitList.size
 
-    // 4. 用于外部调用更新列表项的函数
     fun updateItem(outfit: Outfit, position: Int) {
-        // 找到列表中的旧数据，替换为新数据
-        outfitList[position] = outfit
-        // 刷新列表项，只刷新这一个，效率高
-        notifyItemChanged(position)
+        if (position in 0 until outfitList.size) {
+            outfitList[position] = outfit
+            notifyItemChanged(position)
+        }
     }
 }

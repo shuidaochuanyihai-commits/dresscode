@@ -42,9 +42,31 @@ class OutfitDisplayFragment : Fragment(R.layout.fragment_outfit_display), Outfit
             outfitList.clear()
             outfitList.addAll(newList)
             adapter.notifyDataSetChanged()
+
+            // 🔴 搜索逻辑
+            val searchView = view.findViewById<androidx.appcompat.widget.SearchView>(R.id.search_view)
+
+            searchView.setOnQueryTextListener(object : androidx.appcompat.widget.SearchView.OnQueryTextListener {
+                // 当点击键盘上的搜索键时触发
+                override fun onQueryTextSubmit(query: String?): Boolean {
+                    viewModel.searchOutfits(query ?: "")
+                    return true
+                }
+
+                // 当输入框内容改变时触发 (实时搜索)
+                override fun onQueryTextChange(newText: String?): Boolean {
+                    viewModel.searchOutfits(newText ?: "")
+                    return true
+                }
+            })
         })
 
         // 4. 首次加载数据
+        viewModel.loadOutfits()
+    }
+
+    override fun onResume() {
+        super.onResume()
         viewModel.loadOutfits()
     }
 

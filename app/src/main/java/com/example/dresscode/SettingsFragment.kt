@@ -26,6 +26,15 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         val rbFemale = view.findViewById<RadioButton>(R.id.rb_female)
         val rbMale = view.findViewById<RadioButton>(R.id.rb_male)
         val btnLogout = view.findViewById<Button>(R.id.btn_logout)
+        // 🔴 新增：找到收藏按钮
+        val btnFavorites = view.findViewById<Button>(R.id.btn_my_favorites)
+
+        // 🔴 新增：点击弹出收藏列表
+        btnFavorites.setOnClickListener {
+            val dialog = FavoriteSelectionDialog()
+            dialog.show(childFragmentManager, "MyFavorites") // ✅ 改成 childFragmentManager
+        }
+
 
         // 2. 读取之前保存的设置，并显示在界面上
         val savedGender = prefs.getString("gender_pref", "all") // 默认是 "all"

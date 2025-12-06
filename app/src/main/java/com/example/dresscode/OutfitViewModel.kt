@@ -1,12 +1,13 @@
 package com.example.dresscode
 
 import android.app.Application
+import android.content.Context // 🔴 补上了这个
+import android.content.SharedPreferences // 🔴 还有这个
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.dresscode.database.AppDatabase
 import com.example.dresscode.database.Outfit
-import com.example.dresscode.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -15,54 +16,86 @@ class OutfitViewModel(application: Application) : AndroidViewModel(application) 
 
     private val outfitDao = AppDatabase.getDatabase(application).outfitDao()
 
-    // LiveData 用于通知 Fragment 列表数据发生了变化
+    // 获取 SharedPreferences
+    private val prefs: SharedPreferences = application.getSharedPreferences("app_settings", Context.MODE_PRIVATE)
+
+    // LiveData
     val outfitList = MutableLiveData<List<Outfit>>()
 
-    // 1. 初始化数据 (只在第一次启动时插入假数据)
     init {
         viewModelScope.launch {
-            // 检查数据库是否有数据
             if (outfitDao.getCount() == 0) {
                 val dummyData = createDummyData()
                 outfitDao.insertAll(dummyData)
             }
+            // 初始化时加载
             loadOutfits()
         }
     }
 
-    // 2. 从数据库加载穿搭数据
+    // 加载穿搭 (带性别筛选)
     fun loadOutfits() {
         viewModelScope.launch {
+            // 读取设置，如果没有设置过默认是 "all"
+            val preferredGender = prefs.getString("gender_pref", "all") ?: "all"
+
             val data = withContext(Dispatchers.IO) {
-                outfitDao.getAllOutfits()
+                if (preferredGender == "all") {
+                    outfitDao.getAllOutfits()
+                } else {
+                    outfitDao.getOutfitsByGender(preferredGender)
+                }
             }
             outfitList.value = data
         }
     }
 
-    // 3. 收藏/取消收藏逻辑
+    // 收藏/取消收藏
     fun toggleFavorite(outfit: Outfit) {
         viewModelScope.launch(Dispatchers.IO) {
-            // 切换状态
             outfit.isFavorite = !outfit.isFavorite
-            // 更新数据库
             outfitDao.updateOutfit(outfit)
-            // 重新加载数据 (或者只更新列表中的单个项，这里我们选择重新加载，保证数据一致性)
             loadOutfits()
         }
     }
 
-    // 4. 假数据源 (和上次一样，但现在是为数据库准备的)
+    // 假数据 (带性别)
     private fun createDummyData(): List<Outfit> {
         return listOf(
-            Outfit(imageResId = R.drawable.outfit_korean, title = "韩系温柔风"),
-            Outfit(imageResId = R.drawable.outfit_summer, title = "夏季清凉穿搭"),
-            Outfit(imageResId = R.drawable.outfit_street, title = "欧美街头风"),
-            Outfit(imageResId = R.drawable.outfit_black, title = "黑色神秘感"),
-            Outfit(imageResId = R.drawable.outfit_pink, title = "粉色少女心"),
-            Outfit(imageResId = R.drawable.outfit_man_suit, title = "男士休闲西装"),
-            Outfit(imageResId = R.drawable.outfit_sport, title = "户外运动风"),
-            Outfit(imageResId = R.drawable.outfit_retro, title = "复古风格")
+            // --- 👧 女生专区 (把原本看起来像女装的都划过来) ---
+            Outfit(imageResId = R.drawable.outfit_korean, title = "韩系温柔风", gender = "female"),
+            Outfit(imageResId = R.drawable.outfit_summer, title = "夏季清凉穿搭", gender = "female"),
+            Outfit(imageResId = R.drawable.outfit_pink, title = "粉色少女心", gender = "female"),
+            // 原本是中性的，现在强制划为女生
+            Outfit(imageResId = R.drawable.outfit_street, title = "欧美街头风", gender = "female"),
+            Outfit(imageResId = R.drawable.outfit_black, title = "黑色神秘感", gender = "female"),
+            Outfit(imageResId = R.drawable.outfit_retro, title = "复古风格", gender = "female"),
+
+            // --- 👦 男生专区 (之前的西装 + 新加的3张) ---
+            Outfit(imageResId = R.drawable.outfit_man_suit, title = "男士商务西装", gender = "male"),
+            // 下面这三张是你刚才新加的图片，如果没有加会报错，请确保图片已放入 drawable
+            Outfit(imageResId = R.drawable.outfit_man_casual, title = "清爽休闲风", gender = "male"),
+            Outfit(imageResId = R.drawable.outfit_man_sport, title = "活力运动风", gender = "male"),
+            Outfit(imageResId = R.drawable.outfit_man_jacket, title = "型男夹克", gender = "male")
         )
+    }
+    // 🔴 新增：搜索方法
+    fun searchOutfits(keyword: String) {
+        viewModelScope.launch {
+            // 1. 获取当前性别偏好 (搜索也要遵守性别筛选)
+            val preferredGender = prefs.getString("gender_pref", "all") ?: "all"
+
+            val data = withContext(Dispatchers.IO) {
+                if (keyword.isEmpty()) {
+                    // 如果没输入字，就恢复正常加载
+                    if (preferredGender == "all") outfitDao.getAllOutfits()
+                    else outfitDao.getOutfitsByGender(preferredGender)
+                } else {
+                    // 如果输入了字，就去搜
+                    outfitDao.searchOutfits(keyword, preferredGender)
+                }
+            }
+            outfitList.value = data
+        }
     }
 }
