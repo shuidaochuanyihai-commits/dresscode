@@ -1,15 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".WeatherFragment">
+    android:orientation="vertical"
+    android:gravity="center"
+    android:background="#F5F5F5"
+    android:padding="20dp">
 
     <TextView
+        android:id="@+id/tv_city"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="天气模块"
-        android:textSize="24sp" />
+        android:text="正在定位..."
+        android:textSize="32sp"
+        android:textStyle="bold"
+        android:textColor="@color/black" />
 
-</FrameLayout>
+    <TextView
+        android:id="@+id/tv_weather_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="--"
+        android:textSize="24sp"
+        android:textColor="#555555" />
+
+    <TextView
+        android:id="@+id/tv_temperature"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="--°C"
+        android:textSize="60sp"
+        android:textStyle="bold"
+        android:textColor="@color/black" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="40dp">
+
+        <Button
+            android:id="@+id/btn_my_location"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="📍 定位当前"
+            android:backgroundTint="#4CAF50"
+            android:textColor="@color/white"
+            android:layout_marginEnd="20dp"/>
+
+        <Button
+            android:id="@+id/btn_switch_city"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="切换城市"
+            android:backgroundTint="#2196F3"
+            android:textColor="@color/white"/>
+    </LinearLayout>
+
+</LinearLayout>

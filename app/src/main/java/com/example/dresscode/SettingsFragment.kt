@@ -1,16 +1,58 @@
-package com.example.dresscode // 替换为你的项目包名
+package com.example.dresscode
 
+import android.content.Context
+import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
+import android.widget.Button
+import android.widget.RadioButton
+import android.widget.RadioGroup
+import android.widget.TextView
+import androidx.fragment.app.Fragment
 
-// 继承 Fragment，并传入布局文件的 ID (R.layout.fragment_outfit_display)
 class SettingsFragment : Fragment(R.layout.fragment_settings) {
+
+    private lateinit var prefs: SharedPreferences
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        // 模块功能代码将写在这里，例如初始化 RecyclerView
+
+        // 1. 获取存储工具 (名字叫 "app_settings")
+        prefs = requireContext().getSharedPreferences("app_settings", Context.MODE_PRIVATE)
+
+        val rgGender = view.findViewById<RadioGroup>(R.id.rg_gender)
+        val rbAll = view.findViewById<RadioButton>(R.id.rb_all)
+        val rbFemale = view.findViewById<RadioButton>(R.id.rb_female)
+        val rbMale = view.findViewById<RadioButton>(R.id.rb_male)
+        val btnLogout = view.findViewById<Button>(R.id.btn_logout)
+
+        // 2. 读取之前保存的设置，并显示在界面上
+        val savedGender = prefs.getString("gender_pref", "all") // 默认是 "all"
+        when (savedGender) {
+            "female" -> rbFemale.isChecked = true
+            "male" -> rbMale.isChecked = true
+            else -> rbAll.isChecked = true
+        }
+
+        // 3. 监听选择变化，一旦点了就自动保存
+        rgGender.setOnCheckedChangeListener { _, checkedId ->
+            val editor = prefs.edit()
+            when (checkedId) {
+                R.id.rb_female -> editor.putString("gender_pref", "female")
+                R.id.rb_male -> editor.putString("gender_pref", "male")
+                else -> editor.putString("gender_pref", "all")
+            }
+            editor.apply() // 提交保存
+        }
+
+        // 4. 退出登录逻辑
+        btnLogout.setOnClickListener {
+            // 跳转回登录页
+            val intent = Intent(requireContext(), LoginActivity::class.java)
+            // 清空任务栈，防止按返回键又回到主页
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+        }
     }
 }

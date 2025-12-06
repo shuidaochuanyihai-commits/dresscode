@@ -64,4 +64,10 @@ dependencies {
     implementation "androidx.navigation:navigation-ui-ktx:2.6.0"
 
 
+    // 1. 网络请求库 Retrofit + Gson 解析
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+
+    // 2. 谷歌定位服务
+    implementation("com.google.android.gms:play-services-location:21.0.1")
 }
