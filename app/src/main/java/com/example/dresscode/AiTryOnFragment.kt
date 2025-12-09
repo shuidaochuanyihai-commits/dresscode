@@ -44,8 +44,8 @@ class AiTryOnFragment : Fragment(R.layout.fragment_ai_try_on) {
     private var isOutfitSet = false
 
     // 数据暂存
-    private var selectedOutfitTitle = "fashion dress" // 选中的衣服名字
-    private var userBitmap: Bitmap? = null            // 用户上传的照片 (用于发给 AI)
+    private var selectedOutfitTitle = "fashion dress"
+    private var userBitmap: Bitmap? = null
 
     // 网络配置 (增加超时时间，防止 AI 生成慢导致报错)
     private val client = OkHttpClient.Builder()

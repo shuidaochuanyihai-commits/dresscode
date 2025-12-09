@@ -48,6 +48,33 @@ class OutfitViewModel(application: Application) : AndroidViewModel(application) 
 
     private val qwenService = qwenRetrofit.create(AiService::class.java)
 
+    // 🔴 新增：UserDao 实例
+    private val userDao = AppDatabase.getDatabase(application).userDao()
+
+    // 🔴 新增：当前用户的 LiveData
+    val currentUser = MutableLiveData<com.example.dresscode.database.User?>()
+
+    // 🔴 新增：加载当前用户信息
+    fun loadCurrentUser() {
+        viewModelScope.launch {
+            // 从 SP 里读取登录时存的 ID
+            val userId = prefs.getInt("current_user_id", -1)
+            if (userId != -1) {
+                val user = userDao.getUserById(userId)
+                currentUser.value = user
+            }
+        }
+    }
+
+    // 🔴 新增：更新用户 (换头像/改名)
+    fun updateUserInfo(user: com.example.dresscode.database.User) {
+        viewModelScope.launch(Dispatchers.IO) {
+            userDao.updateUser(user)
+            // 更新完重新加载，刷新 UI
+            loadCurrentUser()
+        }
+    }
+
 
     init {
         viewModelScope.launch {
@@ -165,6 +192,7 @@ class OutfitViewModel(application: Application) : AndroidViewModel(application) 
             // ... 给其他衣服也随便填点默认值 ...
             Outfit(imageResId = R.drawable.outfit_black, title = "黑色神秘感", gender = "female", style = "街头", season = "冬季", scene = "派对")
         )
+
 
     }
 }

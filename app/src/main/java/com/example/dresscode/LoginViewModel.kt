@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.dresscode.database.AppDatabase
 import com.example.dresscode.database.User
 import kotlinx.coroutines.launch
+import android.content.Context
 
 // 继承 AndroidViewModel 可以直接获取 application 上下文，方便拿数据库
 class LoginViewModel(application: Application) : AndroidViewModel(application) {
@@ -23,13 +24,17 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     // 3. 注册逻辑
     fun register(name: String, pwd: String) {
         viewModelScope.launch {
-            // 先查查有没有这个人
             val existingUser = userDao.getUserByName(name)
             if (existingUser != null) {
-                registerMessage.value = "用户名已存在，换一个吧"
+                registerMessage.value = "账号已存在，换一个吧"
             } else {
-                // 没有就插入新用户
-                val newUser = User(username = name, password = pwd)
+                // 🔴 修改：创建用户时，同时设置 username(账号) 和 nickname(昵称)
+                // 默认昵称 = 账号名
+                val newUser = User(
+                    username = name,
+                    password = pwd,
+                    nickname = name // 初始昵称和账号一样
+                )
                 userDao.insertUser(newUser)
                 registerMessage.value = "注册成功！请登录"
             }
@@ -37,16 +42,17 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     // 4. 登录逻辑
+    // 修改 LoginViewModel.kt
     fun login(name: String, pwd: String) {
         viewModelScope.launch {
-            // 去数据库查匹配的用户
             val user = userDao.login(name, pwd)
             if (user != null) {
-                // 查到了，通知 Activity 登录成功
+                // 🔴 关键修改：登录成功时，把 User ID 存到 SharedPreferences
+                val prefs = getApplication<Application>().getSharedPreferences("app_settings", Context.MODE_PRIVATE)
+                prefs.edit().putInt("current_user_id", user.id).apply()
+
                 loginResult.value = true
-                // 这里还可以把用户ID存到 SharedPreferences，以后做“我的”模块用
             } else {
-                // 没查到
                 loginResult.value = false
             }
         }
