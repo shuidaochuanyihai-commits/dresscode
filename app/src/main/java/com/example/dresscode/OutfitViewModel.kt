@@ -65,7 +65,62 @@ class OutfitViewModel(application: Application) : AndroidViewModel(application) 
             }
         }
     }
+// ... 原有代码 ...
 
+    // 🔴 新增：分析单张图片 (用于发布页)
+    // 返回一个 Map，包含识别出的 style, season, scene
+    val aiAnalysisResult = MutableLiveData<Map<String, String>>()
+
+    fun analyzeSingleImage(context: Context, imageUri: android.net.Uri) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                // 1. 从 Uri 读图片并转 Base64
+                val inputStream = context.contentResolver.openInputStream(imageUri)
+                val bitmap = BitmapFactory.decodeStream(inputStream)
+                val base64 = ImageUtils.bitmapToBase64(bitmap)
+
+                // 2. 构造 Prompt (和之前一样)
+                val prompt = """
+                    请分析图片服装。严格返回JSON: {"style": "...", "season": "...", "scene": "..."}。
+                    style选: [休闲, 商务, 街头, 甜美, 复古]。
+                    season选: [夏季, 冬季, 春秋]。
+                    scene选: [日常, 上班, 约会, 运动, 派对]。
+                """.trimIndent()
+
+                val messages = listOf(
+                    QwenMessage("user", listOf(
+                        QwenContent("text", prompt),
+                        QwenContent("image_url", image_url = QwenImageUrl("data:image/jpeg;base64,$base64"))
+                    ))
+                )
+
+                // 3. 请求 API
+                val response = qwenService.analyzeImage(QWEN_API_KEY, QwenRequest(messages = messages))
+                val jsonContent = response.choices[0].message.content
+
+                // 4. 提取结果
+                val result = mapOf(
+                    "style" to extractValue(jsonContent, "style"),
+                    "season" to extractValue(jsonContent, "season"),
+                    "scene" to extractValue(jsonContent, "scene")
+                )
+
+                // 5. 通知 UI
+                aiAnalysisResult.postValue(result)
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    // 🔴 新增：插入一条新穿搭
+    fun insertOutfit(outfit: Outfit) {
+        viewModelScope.launch {
+            outfitDao.insertAll(listOf(outfit)) // 复用 insertAll 插入单个
+            applyFilters() // 刷新列表
+        }
+    }
     // 🔴 新增：更新用户 (换头像/改名)
     fun updateUserInfo(user: com.example.dresscode.database.User) {
         viewModelScope.launch(Dispatchers.IO) {

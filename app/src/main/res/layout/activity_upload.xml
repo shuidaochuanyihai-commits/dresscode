@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="20dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="发布新穿搭"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="20dp"/>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:background="#EEEEEE">
+
+            <ImageView
+                android:id="@+id/iv_upload_preview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="fitCenter" />
+
+            <TextView
+                android:id="@+id/tv_upload_hint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="点击上传图片"
+                android:textColor="#888888"/>
+        </FrameLayout>
+
+        <EditText
+            android:id="@+id/et_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:hint="给这套穿搭起个名字吧..." />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="添加标签 (可手动选，也可 AI 识别)"
+            android:layout_marginTop="20dp"
+            android:textStyle="bold"/>
+
+        <LinearLayout android:orientation="horizontal" android:layout_marginTop="10dp" android:gravity="center_vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
+            <TextView android:text="风格：" android:layout_width="60dp" android:layout_height="wrap_content"/>
+            <Spinner android:id="@+id/sp_upload_style" android:layout_width="match_parent" android:layout_height="40dp" android:background="#F0F0F0"/>
+        </LinearLayout>
+
+        <LinearLayout android:orientation="horizontal" android:layout_marginTop="10dp" android:gravity="center_vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
+            <TextView android:text="季节：" android:layout_width="60dp" android:layout_height="wrap_content"/>
+            <Spinner android:id="@+id/sp_upload_season" android:layout_width="match_parent" android:layout_height="40dp" android:background="#F0F0F0"/>
+        </LinearLayout>
+
+        <LinearLayout android:orientation="horizontal" android:layout_marginTop="10dp" android:gravity="center_vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
+            <TextView android:text="场景：" android:layout_width="60dp" android:layout_height="wrap_content"/>
+            <Spinner android:id="@+id/sp_upload_scene" android:layout_width="match_parent" android:layout_height="40dp" android:background="#F0F0F0"/>
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btn_ai_analyze"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="✨ AI 自动识别标签"
+            android:backgroundTint="#673AB7"/>
+
+        <Button
+            android:id="@+id/btn_publish"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_marginTop="30dp"
+            android:text="发布笔记"
+            android:textSize="18sp"
+            android:backgroundTint="#FF4081"/>
+
+    </LinearLayout>
+</ScrollView>

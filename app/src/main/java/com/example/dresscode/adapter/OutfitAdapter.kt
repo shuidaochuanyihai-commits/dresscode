@@ -42,25 +42,34 @@ class OutfitAdapter(private val outfitList: MutableList<Outfit>, private val lis
     override fun onBindViewHolder(holder: OutfitViewHolder, position: Int) {
         val outfit = outfitList[position]
 
-        // 🔴 核心逻辑：根据 currentMode 决定显示什么字
+        // 1. 设置文字内容
         holder.titleView.text = when (currentMode) {
             "style" -> "风格：${outfit.style}"
             "season" -> "季节：${outfit.season}"
             "scene" -> "场景：${outfit.scene}"
-            else -> outfit.title // 默认显示标题
+            else -> outfit.title
         }
 
-        // 设置爱心状态
+        // 2. 设置爱心状态
         val heartIconRes = if (outfit.isFavorite) R.drawable.ic_favorite_filled else R.drawable.ic_favorite_border
         holder.favBtn.setImageResource(heartIconRes)
 
-        // 加载图片
-        Glide.with(holder.itemView.context)
-            .load(outfit.imageResId)
-            .placeholder(R.drawable.ic_launcher_foreground)
-            .into(holder.imageView)
+        // 🔴 3. 关键修复：智能加载图片
+        // 先检查是不是用户上传的 (imagePath 有值)
+        if (!outfit.imagePath.isNullOrEmpty()) {
+            Glide.with(holder.itemView.context)
+                .load(outfit.imagePath) // 加载文件路径 (String/Uri)
+                .placeholder(R.drawable.ic_launcher_foreground)
+                .into(holder.imageView)
+        } else {
+            // 没有路径，说明是系统预设的 (加载 imageResId)
+            Glide.with(holder.itemView.context)
+                .load(outfit.imageResId) // 加载资源 ID (Int)
+                .placeholder(R.drawable.ic_launcher_foreground)
+                .into(holder.imageView)
+        }
 
-        // 点击事件 (双保险)
+        // 4. 点击事件
         holder.itemView.setOnClickListener { listener.onOutfitSelect(outfit) }
         holder.imageView.setOnClickListener { listener.onOutfitSelect(outfit) }
         holder.favBtn.setOnClickListener { listener.onFavoriteClick(outfit, position) }

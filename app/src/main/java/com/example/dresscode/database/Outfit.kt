@@ -7,14 +7,14 @@ import androidx.room.PrimaryKey
 data class Outfit(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
-    val imageResId: Int,
+    val imageResId: Int, // 本地资源ID (预设的)
     val title: String,
-    val gender: String, // male, female, all
+    val gender: String,
+    var style: String = "其他",
+    var season: String = "四季",
+    var scene: String = "日常",
+    var isFavorite: Boolean = false,
 
-    // 🔴 新增：AI 识别的标签
-    var style: String = "其他",   // 风格 (如：休闲、商务、复古)
-    var season: String = "四季",  // 季节 (如：夏季、冬季)
-    var scene: String = "日常",   // 场景 (如：上班、约会、运动)
-
-    var isFavorite: Boolean = false
+    // 🔴 新增：支持用户上传的图片路径
+    val imagePath: String? = null
 )

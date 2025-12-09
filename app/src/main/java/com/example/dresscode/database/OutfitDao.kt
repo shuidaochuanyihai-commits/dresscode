@@ -1,43 +1,30 @@
 package com.example.dresscode.database
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 
 @Dao
 interface OutfitDao {
-    // 1. 插入多条穿搭数据 (用来初始化数据)
+    // 1. 插入多条穿搭数据 (初始化用)
     @Insert
     suspend fun insertAll(outfits: List<Outfit>)
 
-    // 2. 更新穿搭的收藏状态
+    // 2. 更新穿搭的收藏状态或标签
     @Update
     suspend fun updateOutfit(outfit: Outfit)
 
-    // 3. 获取所有穿搭 (首页展示用)
-    @Query("SELECT * FROM outfit_table")
-    fun getAllOutfits(): List<Outfit> // 注意：这里不用 suspend，因为 Room 会自动处理 Flow/LiveData
+    // 🔴 修改 1：获取所有穿搭 (加了 ORDER BY id DESC)
+    @Query("SELECT * FROM outfit_table ORDER BY id DESC")
+    fun getAllOutfits(): List<Outfit>
 
-    // 🔴 新增：根据性别筛选穿搭
-    @Query("SELECT * FROM outfit_table WHERE gender = :gender")
+    // 🔴 修改 2：根据性别筛选 (加了 ORDER BY id DESC)
+    @Query("SELECT * FROM outfit_table WHERE gender = :gender ORDER BY id DESC")
     fun getOutfitsByGender(gender: String): List<Outfit>
 
-    // 4. 获取所有收藏的穿搭 (为“智能换装模块”做准备)
-    @Query("SELECT * FROM outfit_table WHERE isFavorite = 1")
-    suspend fun getFavoriteOutfits(): List<Outfit>
-
-    // 5. 检查数据库是否为空 (防止重复插入假数据)
-    @Query("SELECT COUNT(id) FROM outfit_table")
-    suspend fun getCount(): Int
-
-    // 🔴 新增：根据标题模糊搜索 (忽略大小写)
-    // gender 逻辑：如果当前选了性别，还得在性别范围内搜；如果没选，就全局搜
-    @Query("SELECT * FROM outfit_table WHERE title LIKE '%' || :keyword || '%' AND (gender = :gender OR :gender = 'all')")
-    suspend fun searchOutfits(keyword: String, gender: String): List<Outfit>
-
-    // 🔴 新增：高级筛选
-    // 逻辑：如果参数传了空字符串 ""，就代表不筛选这个条件 (使用 LIKE '%%')
+    // 🔴 修改 3：高级筛选 (加了 ORDER BY id DESC)
     @Query("""
         SELECT * FROM outfit_table 
         WHERE (gender = :gender OR :gender = 'all')
@@ -45,6 +32,7 @@ interface OutfitDao {
         AND (:style = '' OR style = :style)
         AND (:season = '' OR season = :season)
         AND (:scene = '' OR scene = :scene)
+        ORDER BY id DESC
     """)
     suspend fun filterOutfits(
         keyword: String,
@@ -53,5 +41,12 @@ interface OutfitDao {
         season: String,
         scene: String
     ): List<Outfit>
-}
 
+    // 获取所有收藏的穿搭 (收藏列表通常也可以倒序，看你喜好)
+    @Query("SELECT * FROM outfit_table WHERE isFavorite = 1 ORDER BY id DESC")
+    suspend fun getFavoriteOutfits(): List<Outfit>
+
+    // 检查数据库是否为空
+    @Query("SELECT COUNT(id) FROM outfit_table")
+    suspend fun getCount(): Int
+}

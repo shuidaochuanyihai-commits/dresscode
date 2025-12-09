@@ -36,6 +36,8 @@
             android:name=".RegisterActivity"
             android:exported="false" />
 
+        <activity android:name=".UploadActivity" />。
+
         <activity
             android:name=".MainActivity"
             android:exported="false" />

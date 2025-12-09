@@ -33,10 +33,17 @@ class OutfitDisplayFragment : Fragment(R.layout.fragment_outfit_display), Outfit
         val spSeason = view.findViewById<Spinner>(R.id.sp_season)
         val spScene = view.findViewById<Spinner>(R.id.sp_scene)
 
+        // 🔴 绑定悬浮按钮
+        val fabAdd = view.findViewById<View>(R.id.fab_add_outfit)
+        fabAdd.setOnClickListener {
+            startActivity(android.content.Intent(requireContext(), UploadActivity::class.java))
+        }
+
         // 初始化列表
         val layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
         layoutManager.gapStrategy = StaggeredGridLayoutManager.GAP_HANDLING_NONE
         recyclerView.layoutManager = layoutManager
+
 
         adapter = OutfitAdapter(outfitList, this)
         recyclerView.adapter = adapter
