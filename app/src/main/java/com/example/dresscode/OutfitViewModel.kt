@@ -185,14 +185,19 @@ class OutfitViewModel(application: Application) : AndroidViewModel(application) 
     // 假数据 (带 style, season, scene 初始值)
     private fun createDummyData(): List<Outfit> {
         return listOf(
+            // --- 👧 女生专区 ---
             Outfit(imageResId = R.drawable.outfit_korean, title = "韩系温柔风", gender = "female", style = "甜美", season = "春秋", scene = "约会"),
             Outfit(imageResId = R.drawable.outfit_summer, title = "夏季清凉穿搭", gender = "female", style = "休闲", season = "夏季", scene = "日常"),
+            Outfit(imageResId = R.drawable.outfit_pink, title = "粉色少女心", gender = "female", style = "甜美", season = "夏季", scene = "约会"),
+            Outfit(imageResId = R.drawable.outfit_street, title = "欧美街头风", gender = "female", style = "街头", season = "春秋", scene = "日常"),
+            Outfit(imageResId = R.drawable.outfit_black, title = "黑色神秘感", gender = "female", style = "街头", season = "冬季", scene = "派对"),
+            Outfit(imageResId = R.drawable.outfit_retro, title = "复古风格", gender = "female", style = "复古", season = "春秋", scene = "日常"),
+
+            // --- 👦 男生专区 ---
             Outfit(imageResId = R.drawable.outfit_man_suit, title = "男士商务西装", gender = "male", style = "商务", season = "春秋", scene = "上班"),
+            Outfit(imageResId = R.drawable.outfit_man_casual, title = "清爽休闲风", gender = "male", style = "休闲", season = "夏季", scene = "日常"),
             Outfit(imageResId = R.drawable.outfit_man_sport, title = "活力运动风", gender = "male", style = "休闲", season = "夏季", scene = "运动"),
-            // ... 给其他衣服也随便填点默认值 ...
-            Outfit(imageResId = R.drawable.outfit_black, title = "黑色神秘感", gender = "female", style = "街头", season = "冬季", scene = "派对")
+            Outfit(imageResId = R.drawable.outfit_man_jacket, title = "型男夹克", gender = "male", style = "街头", season = "冬季", scene = "日常")
         )
-
-
     }
 }
